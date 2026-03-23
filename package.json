@@ -1,0 +1,17 @@
+{
+  "name": "doji-hammer-scanner",
+  "version": "2.0.0",
+  "description": "Scan top 10 NSE stocks for Doji+Hammer patterns across multiple timeframes using Zerodha Kite",
+  "main": "src/index.js",
+  "scripts": {
+    "login": "node src/auth.js",
+    "fetch": "node src/fetchAndSave.js",
+    "scan": "node src/index.js"
+  },
+  "dependencies": {
+    "kiteconnect": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "cli-table3": "^0.6.5",
+    "chalk": "^4.1.2"
+  }
+}
