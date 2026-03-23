@@ -65,4 +65,17 @@ const KITE = {
 
 const DATA_DIR = require("path").join(__dirname, "..", "data");
 
-module.exports = { NSE_TOP_10, INTERVALS, KITE, DATA_DIR, TRADE_CONFIG, CONFIRMATION };
+/** Convert a Date or ISO string to IST: "YYYY-MM-DD HH:mm:ss" */
+function toIST(d) {
+  if (!d) return "";
+  const date = d instanceof Date ? d : new Date(d);
+  if (isNaN(date)) return String(d);
+  return date.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  }).replace(/(\d+)\/(\d+)\/(\d+),\s*/, "$3-$2-$1 ");
+}
+
+module.exports = { NSE_TOP_10, INTERVALS, KITE, DATA_DIR, TRADE_CONFIG, CONFIRMATION, toIST };

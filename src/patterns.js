@@ -13,6 +13,8 @@
  *     (tiny range candles = noise, not conviction)
  */
 
+const { toIST } = require("./config");
+
 // ══════════════════════════════════════════════════════════════
 //  THRESHOLDS — All tunable. Adjust and re-run `npm run scan`.
 // ══════════════════════════════════════════════════════════════
@@ -170,7 +172,7 @@ function buildRow(symbol, interval, pattern, candle1, candle2, candles, idx) {
     pattern,
     signalIndex: idx,  // index of the SECOND candle in the pair
 
-    candle1_date:   candle1.date,
+    candle1_date:   toIST(candle1.date),
     candle1_open:   candle1.open,
     candle1_high:   candle1.high,
     candle1_low:    candle1.low,
@@ -182,7 +184,7 @@ function buildRow(symbol, interval, pattern, candle1, candle2, candles, idx) {
     candle1_lower_wick_pct: m1.range > 0 ? ((m1.lowerWick / m1.range) * 100).toFixed(2) : "0",
     candle1_upper_wick_pct: m1.range > 0 ? ((m1.upperWick / m1.range) * 100).toFixed(2) : "0",
 
-    candle2_date:   candle2.date,
+    candle2_date:   toIST(candle2.date),
     candle2_open:   candle2.open,
     candle2_high:   candle2.high,
     candle2_low:    candle2.low,

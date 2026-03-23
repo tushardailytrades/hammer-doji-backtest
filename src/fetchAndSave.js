@@ -23,6 +23,17 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function fmt(d) { return d.toISOString().split("T")[0]; }
 
+/** Convert a Date or ISO string to IST string: "YYYY-MM-DD HH:mm:ss" */
+function toIST(d) {
+  const date = d instanceof Date ? d : new Date(d);
+  return date.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  }).replace(/(\d+)\/(\d+)\/(\d+),\s*/, "$3-$2-$1 ");
+}
+
 function buildChunks(fromDate, toDate, chunkDays) {
   const chunks = [];
   let cursor = new Date(fromDate);
@@ -59,7 +70,7 @@ async function fetchOne(token, symbol, interval) {
       );
 
       const candles = data.map((c) => ({
-        date:   c.date instanceof Date ? c.date.toISOString() : String(c.date),
+        date:   toIST(c.date),
         open:   c.open,
         high:   c.high,
         low:    c.low,

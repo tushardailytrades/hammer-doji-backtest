@@ -6,7 +6,7 @@ const Table  = require("cli-table3");
 const chalk  = require("chalk");
 const fs     = require("fs");
 const path   = require("path");
-const { TRADE_CONFIG } = require("./config");
+const { TRADE_CONFIG, toIST } = require("./config");
 
 // ══════════════════════════════════════════════════════════════
 //  CONSOLE REPORTS
@@ -201,7 +201,7 @@ function saveResults(allTrades, patterns, outputDir) {
 
   // 4. Full JSON
   const json = {
-    generated: new Date().toISOString(),
+    generated: toIST(new Date()),
     config: TRADE_CONFIG,
     totalSignals: allTrades.length,
     confirmedTrades: confirmed.length,

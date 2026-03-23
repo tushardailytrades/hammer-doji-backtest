@@ -19,7 +19,7 @@
  *     - which targets were hit during the trade's lifetime
  */
 
-const { TRADE_CONFIG, CONFIRMATION } = require("./config");
+const { TRADE_CONFIG, CONFIRMATION, toIST } = require("./config");
 
 const r2 = (n) => Math.round(n * 100) / 100;
 
@@ -191,7 +191,7 @@ function simulateTrade(signal, candles, interval) {
     hammer_volume:   candles[hammerIdx] ? candles[hammerIdx].volume : 0,
 
     // Trade levels
-    entry_date:  entryCandle.date,
+    entry_date:  toIST(entryCandle.date),
     entry_price: r2(entry),
     sl_price:    r2(sl),
     t1_price:    r2(t1),
@@ -201,7 +201,7 @@ function simulateTrade(signal, candles, interval) {
     risk_pct:    r2((risk / entry) * 100),
 
     // Exit
-    exit_date:    exitDate,
+    exit_date:    toIST(exitDate),
     exit_price:   r2(exitPrice),
     exit_type:    exitType,
     hold_candles: holdCandles,
@@ -214,11 +214,11 @@ function simulateTrade(signal, candles, interval) {
 
     // Target tracking
     t1_hit:      t1Hit ? "YES" : "NO",
-    t1_hit_date: t1HitDate,
+    t1_hit_date: toIST(t1HitDate),
     t2_hit:      t2Hit ? "YES" : "NO",
-    t2_hit_date: t2HitDate,
+    t2_hit_date: toIST(t2HitDate),
     t3_hit:      t3Hit ? "YES" : "NO",
-    t3_hit_date: t3HitDate,
+    t3_hit_date: toIST(t3HitDate),
 
     // MAE / MFE (max adverse/favorable excursion)
     max_favorable_pct: r2(maxFavorable),
