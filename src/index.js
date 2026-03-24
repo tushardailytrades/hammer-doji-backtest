@@ -1,14 +1,8 @@
 /**
- * index.js — Scan + Backtest + Report (fully offline)
+ * index-hammer-doji.js — HAMMER → DOJI strategy only
  *
- * Reads locally cached candle data from ./data/, detects patterns,
- * applies confirmation filters, simulates trades, and outputs:
- *
- *   output/doji_then_hammer.csv    — pattern detections
- *   output/hammer_then_doji.csv    — pattern detections
- *   output/all_trades.csv          — every signal (confirmed + skipped)
- *   output/confirmed_trades.csv    — only confirmed trades with full P&L
- *   output/backtest_results.json   — complete data dump
+ * Reads locally cached candle data from ./data/, detects Hammer→Doji patterns,
+ * applies confirmation filters, simulates trades, and outputs results.
  *
  * No Kite API calls. Run `npm run fetch` first to download data.
  */
@@ -30,7 +24,7 @@ function main() {
   report.printHeader();
 
   if (!fs.existsSync(DATA_DIR)) {
-    console.error(chalk.red("  ❌ No data found. Run: npm run fetch\n"));
+    console.error(chalk.red("  No data found. Run: npm run fetch\n"));
     process.exit(1);
   }
 
@@ -41,12 +35,12 @@ function main() {
   for (const interval of INTERVALS) {
     const dir = path.join(DATA_DIR, interval.label);
     if (!fs.existsSync(dir)) {
-      console.log(chalk.yellow(`  ⚠️  No data for ${interval.label} — skipping`));
+      console.log(chalk.yellow(`  No data for ${interval.label} — skipping`));
       continue;
     }
 
-    console.log(chalk.bold(`\n  ⏱️  ${interval.label.toUpperCase()}`));
-    console.log("  " + "─".repeat(60));
+    console.log(chalk.bold(`\n  ${interval.label.toUpperCase()}`));
+    console.log("  " + "-".repeat(60));
 
     let intervalTrades = [];
 
@@ -59,9 +53,9 @@ function main() {
 
       const candles = JSON.parse(fs.readFileSync(filePath, "utf8"));
 
-      // ── Step 1: Detect Patterns ──
-      const { dojiThenHammer, hammerThenDoji } = scanPatterns(candles, stock.symbol, interval.label);
-      const signals = [...dojiThenHammer, ...hammerThenDoji];
+      // ── Step 1: Detect Patterns (Hammer→Doji only) ──
+      const { hammerThenDoji } = scanPatterns(candles, stock.symbol, interval.label);
+      const signals = hammerThenDoji;
       allPatterns.push(...signals);
 
       // ── Step 2: Backtest Each Signal ──
@@ -77,14 +71,14 @@ function main() {
       if (signals.length > 0) {
         console.log(
           `    ${stock.symbol.padEnd(12)} ` +
-          `${String(candles.length).padStart(6)} candles → ` +
-          `${chalk.cyan(signals.length + " signals")} → ` +
-          `${chalk.green(confirmed.length + " confirmed")} → ` +
+          `${String(candles.length).padStart(6)} candles -> ` +
+          `${chalk.cyan(signals.length + " signals")} -> ` +
+          `${chalk.green(confirmed.length + " confirmed")} -> ` +
           `${wins.length}W/${(confirmed.length - wins.length)}L  ` +
-          `P&L: ${pnl >= 0 ? chalk.green("₹" + Math.round(pnl).toLocaleString("en-IN")) : chalk.red("-₹" + Math.abs(Math.round(pnl)).toLocaleString("en-IN"))}`
+          `P&L: ${pnl >= 0 ? chalk.green("Rs" + Math.round(pnl).toLocaleString("en-IN")) : chalk.red("-Rs" + Math.abs(Math.round(pnl)).toLocaleString("en-IN"))}`
         );
       } else {
-        console.log(`    ${stock.symbol.padEnd(12)} ${String(candles.length).padStart(6)} candles → ${chalk.gray("0 signals")}`);
+        console.log(`    ${stock.symbol.padEnd(12)} ${String(candles.length).padStart(6)} candles -> ${chalk.gray("0 signals")}`);
       }
     }
 
@@ -100,7 +94,7 @@ function main() {
   // ── Save Files ──
   report.saveResults(allTrades, allPatterns, OUTPUT_DIR);
 
-  console.log(chalk.bold.green("  ✅ Scan + Backtest complete!\n"));
+  console.log(chalk.bold.green("  Scan + Backtest complete! (Hammer -> Doji only)\n"));
 }
 
 main();
