@@ -1,6 +1,6 @@
-# Doji + Hammer Pattern Scanner + Backtester
+# Hammer + Doji Pattern Scanner & Backtester
 
-Scan top 10 NSE stocks for **Doji + Hammer** reversal patterns across **4 timeframes**, apply **confirmation filters**, and backtest with **dynamic SL/targets** anchored to the hammer's actual price action.
+Scan top 10 NSE stocks for **Hammer → Doji** reversal patterns across **4 timeframes**, apply **confirmation filters**, and backtest with **dynamic SL/targets** anchored to the hammer's actual price action.
 
 ## Workflow
 
@@ -24,25 +24,42 @@ npm run fetch
 npm run scan
 ```
 
+## Project Structure
+
+```
+├── src/
+│   ├── index.js          # Main entry — scanner + backtester orchestration
+│   ├── auth.js           # Zerodha Kite authentication
+│   ├── fetchAndSave.js   # Download 1yr of candle data from Zerodha
+│   ├── config.js         # Instruments, timeframes, trade parameters
+│   ├── patterns.js       # Candlestick pattern detection (Doji, Hammer)
+│   ├── backtester.js     # Trade simulation & P&L calculation
+│   └── report.js         # Console output + CSV/JSON export
+├── data/                 # Downloaded candle data (per timeframe)
+├── output/               # Backtest results (CSVs + JSON)
+├── .env                  # Zerodha API credentials
+└── package.json
+```
+
 ## How It Works
 
 ### Pattern Detection
-1. Find **Doji** (body ≤ 25% of range) + **Hammer** (lower wick ≥ 50%, upper wick ≤ 25%)
+1. Find **Hammer** (lower wick ≥ 50%, upper wick ≤ 25%, body ≤ 40%) followed by a **Doji** (body ≤ 25% of range)
 2. Both candles must be **"big"** relative to price (per-timeframe thresholds)
-3. Must appear after a **prior downtrend**
+3. Must appear after a **prior downtrend** (5-candle decline, threshold scales by timeframe)
 
-### Confirmation Filters (NEW)
+### Confirmation Filters
 A pattern alone doesn't trigger a trade. Both must pass:
 - **Bullish entry candle**: The candle after the pattern must close green (buyers following through)
 - **Volume confirmation**: Hammer volume must be ≥ average of prior 10 candles (conviction, not noise)
 
 ### Trade Mechanics
 - **Entry**: Open of the candle AFTER the pattern completes
-- **Stop Loss**: Below the hammer's low + 5% buffer of hammer range (the exact level where the thesis breaks)
+- **Stop Loss**: Below the hammer's low + 5% buffer of hammer range
 - **T1 (conservative)**: Entry + 1.5R to 2R (tracked but NOT the exit trigger)
 - **T2 (exit trigger)**: Entry + 2R to 3R (trade closes here)
 - **T3 (stretch)**: Entry + 3R to 4R (tracked to see if you're leaving money on the table)
-- **Max Hold**: 5-6 candles depending on timeframe
+- **Max Hold**: 5–6 candles depending on timeframe
 
 ### Trade Config Per Timeframe
 
@@ -53,11 +70,14 @@ A pattern alone doesn't trigger a trade. Both must pass:
 | 1hour | 5%        | 2.0R  | 2.5R      | 3.0R   | 5 candles |
 | 1day  | 5%        | 2.0R  | 3.0R      | 4.0R   | 5 candles |
 
+### Instruments
+
+Top 10 NSE stocks by market cap: RELIANCE, TCS, HDFCBANK, INFY, ICICIBANK, HINDUNILVR, SBIN, BHARTIARTL, ITC, KOTAKBANK
+
 ## Output Files
 
 | File                      | Contents |
 |---------------------------|----------|
-| `doji_then_hammer.csv`    | All D→H pattern detections |
 | `hammer_then_doji.csv`    | All H→D pattern detections |
 | `all_trades.csv`          | Every signal — confirmed + skipped, with reason |
 | `confirmed_trades.csv`    | Only confirmed trades with full P&L |
